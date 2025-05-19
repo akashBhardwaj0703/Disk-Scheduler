@@ -105,35 +105,35 @@ body {
 
 /* Track Visualization */
 .track {
-  height: 50px;
-  background-color: var(--track);
-  border-radius: 8px;
+  height: 60px;
+  background-color: #ecf0f1;
+  border-radius: 5px;
   position: relative;
-  margin: 1.5rem 0;
+  margin: 2rem 0;
   overflow: hidden;
 }
 
 .head {
   position: absolute;
-  width: 18px;
-  height: 18px;
-  background-color: var(--accent);
+  width: 20px;
+  height: 20px;
+  background-color: #e74c3c;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
-  transition: left 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  transition: left 0.5s ease-out;
   z-index: 2;
 }
 
 .request {
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: var(--primary);
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
+  transition: background-color 0.3s ease;
 }
 
 /* Algorithm Selector */

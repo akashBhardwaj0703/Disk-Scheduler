@@ -1,46 +1,50 @@
-import { motion } from 'framer-motion'
-
 const HeadMovement = ({ sequence, currentStep, requests }) => {
-  const currentPosition = sequence[currentStep]
-  const trackWidth = 800 // px
-  const scale = trackWidth / 200 // px per track
+  const currentPosition = sequence[currentStep];
+  const trackWidth = 800; // px
+  const scale = trackWidth / 200; // px per track
+
+  // Filter and parse requests
+  const parsedRequests = requests
+    .filter(n => !isNaN(n) && n >= 0 && n <= 199);
 
   return (
     <div className="track">
-      {/* Disk tracks */}
-      <div style={{ 
-        position: 'absolute', 
-        top: '50%', 
-        transform: 'translateY(-50%)',
+      {/* Disk track line */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
         width: '100%',
         height: '2px',
-        backgroundColor: '#bdc3c7'
+        backgroundColor: '#bdc3c7',
+        transform: 'translateY(-50%)'
       }}></div>
       
       {/* Track markers */}
       <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)' }}>0</div>
       <div style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>199</div>
       
-      {/* Requests */}
-      {requests.map((req, i) => (
-        <motion.div
+      {/* Request markers */}
+      {parsedRequests.map((req, i) => (
+        <div
           key={`req-${i}`}
           className="request"
-          initial={{ left: req * scale }}
-          animate={{ left: req * scale }}
-          style={{ left: req * scale }}
+          style={{ 
+            left: `${req * scale}px`,
+            backgroundColor: sequence.includes(req) ? '#3498db' : '#95a5a6'
+          }}
         />
       ))}
       
-      {/* Head */}
-      <motion.div
+      {/* Disk head */}
+      <div
         className="head"
-        initial={{ left: sequence[0] * scale }}
-        animate={{ left: currentPosition * scale }}
-        transition={{ type: 'spring', damping: 10 }}
+        style={{ 
+          left: `${currentPosition * scale}px`,
+          transition: 'left 0.5s ease-out'
+        }}
       />
       
-      {/* Path visualization */}
+      {/* Movement path */}
       {currentStep > 0 && (
         <svg 
           style={{ 
@@ -65,7 +69,7 @@ const HeadMovement = ({ sequence, currentStep, requests }) => {
         </svg>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default HeadMovement
+export default HeadMovement;
