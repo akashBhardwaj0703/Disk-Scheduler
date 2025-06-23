@@ -31,158 +31,95 @@ const Visualize = () => {
     if (reqs.length === 0) return
 
     let seq = []
-    let total = 0
     let current = headPosition
+    let fullSequence = [headPosition]
 
     switch (algorithm) {
       case 'FCFS':
         seq = [...reqs]
-        for (let i = 0; i < seq.length; i++) {
-          total += Math.abs(seq[i] - current)
-          current = seq[i]
-        }
         break
-      
-      case 'SSTF':
-        seq = []
-        let tempReqsSSTF = [...reqs]
-        current = headPosition
-        
-        while (tempReqsSSTF.length > 0) {
-          let closest = tempReqsSSTF.reduce((prev, curr) => 
+      case 'SSTF': {
+        let tempReqs = [...reqs]
+        while (tempReqs.length > 0) {
+          let closest = tempReqs.reduce((prev, curr) =>
             Math.abs(curr - current) < Math.abs(prev - current) ? curr : prev
           )
-          total += Math.abs(closest - current)
           seq.push(closest)
           current = closest
-          tempReqsSSTF = tempReqsSSTF.filter(r => r !== closest)
+          tempReqs = tempReqs.filter(r => r !== closest)
         }
         break
-      
-      case 'SCAN':
-        seq = []
-        let tempReqsSCAN = [...reqs]
-        current = headPosition
-        let dirSCAN = direction === 'right' ? 1 : -1
-        
-        tempReqsSCAN.sort((a, b) => a - b)
-        let leftSCAN = tempReqsSCAN.filter(r => r <= current).sort((a, b) => b - a)
-        let rightSCAN = tempReqsSCAN.filter(r => r > current).sort((a, b) => a - b)
-        
-        if (dirSCAN === 1) {
-          seq = [...rightSCAN]
-          if (rightSCAN.length > 0) total += Math.abs(rightSCAN[rightSCAN.length-1] - current)
-          
-          if (rightSCAN.length > 0) {
-            seq.push(199)
-            total += 199 - rightSCAN[rightSCAN.length-1]
-          }
-          
-          seq = [...seq, ...leftSCAN]
-          if (leftSCAN.length > 0) total += 199 - leftSCAN[0]
+      }
+      case 'SCAN': {
+        let tempReqs = [...reqs].sort((a, b) => a - b)
+        let dir = direction === 'right' ? 1 : -1
+        let left = tempReqs.filter(r => r < current).sort((a, b) => b - a)
+        let right = tempReqs.filter(r => r >= current).sort((a, b) => a - b)
+        if (dir === 1) {
+          seq = [...right]
+          if (seq.length && seq[seq.length - 1] !== 199) seq.push(199)
+          seq = [...seq, ...left]
         } else {
-          seq = [...leftSCAN]
-          if (leftSCAN.length > 0) total += Math.abs(leftSCAN[leftSCAN.length-1] - current)
-          
-          if (leftSCAN.length > 0) {
-            seq.push(0)
-            total += leftSCAN[0]
-          }
-          
-          seq = [...seq, ...rightSCAN]
-          if (rightSCAN.length > 0) total += rightSCAN[rightSCAN.length-1]
+          seq = [...left]
+          if (seq.length && seq[seq.length - 1] !== 0) seq.push(0)
+          seq = [...seq, ...right]
         }
         break
-      
-      case 'LOOK':
-        seq = []
-        let tempReqsLOOK = [...reqs]
-        current = headPosition
-        let dirLOOK = direction === 'right' ? 1 : -1
-        
-        tempReqsLOOK.sort((a, b) => a - b)
-        let leftLOOK = tempReqsLOOK.filter(r => r <= current).sort((a, b) => b - a)
-        let rightLOOK = tempReqsLOOK.filter(r => r > current).sort((a, b) => a - b)
-        
-        if (dirLOOK === 1) {
-          seq = [...rightLOOK]
-          if (rightLOOK.length > 0) total += Math.abs(rightLOOK[rightLOOK.length-1] - current)
-          
-          seq = [...seq, ...leftLOOK]
-          if (leftLOOK.length > 0 && rightLOOK.length > 0)
-            total += rightLOOK[rightLOOK.length-1] - leftLOOK[0]
+      }
+      case 'LOOK': {
+        let tempReqs = [...reqs].sort((a, b) => a - b)
+        let dir = direction === 'right' ? 1 : -1
+        let left = tempReqs.filter(r => r < current).sort((a, b) => b - a)
+        let right = tempReqs.filter(r => r >= current).sort((a, b) => a - b)
+        if (dir === 1) {
+          seq = [...right, ...left]
         } else {
-          seq = [...leftLOOK]
-          if (leftLOOK.length > 0) total += Math.abs(leftLOOK[leftLOOK.length-1] - current)
-          
-          seq = [...seq, ...rightLOOK]
-          if (rightLOOK.length > 0 && leftLOOK.length > 0)
-            total += rightLOOK[rightLOOK.length-1] - leftLOOK[0]
+          seq = [...left, ...right]
         }
         break
-      
-      case 'C-SCAN':
-        seq = []
-        let tempReqsCSCAN = [...reqs]
-        current = headPosition
-        let dirCSCAN = direction === 'right' ? 1 : -1
-        
-        tempReqsCSCAN.sort((a, b) => a - b)
-        let leftCSCAN = tempReqsCSCAN.filter(r => r <= current).sort((a, b) => a - b)
-        let rightCSCAN = tempReqsCSCAN.filter(r => r > current).sort((a, b) => a - b)
-        
-        if (dirCSCAN === 1) {
-          seq = [...rightCSCAN]
-          if (rightCSCAN.length > 0) total += Math.abs(rightCSCAN[rightCSCAN.length-1] - current)
-          
-          if (rightCSCAN.length > 0) {
-            total += 199 - rightCSCAN[rightCSCAN.length-1]
-            if (leftCSCAN.length > 0) total += leftCSCAN[leftCSCAN.length-1]
-          }
-          seq = [...seq, ...leftCSCAN]
+      }
+      case 'C-SCAN': {
+        let tempReqs = [...reqs].sort((a, b) => a - b)
+        let dir = direction === 'right' ? 1 : -1
+        let left = tempReqs.filter(r => r < current).sort((a, b) => a - b)
+        let right = tempReqs.filter(r => r >= current).sort((a, b) => a - b)
+        if (dir === 1) {
+          seq = [...right]
+          if (seq.length && seq[seq.length - 1] !== 199) seq.push(199)
+          if (left.length) seq.push(0)
+          seq = [...seq, ...left]
         } else {
-          seq = [...leftCSCAN]
-          if (leftCSCAN.length > 0) total += Math.abs(leftCSCAN[0] - current)
-          
-          if (leftCSCAN.length > 0) {
-            total += leftCSCAN[0]
-            if (rightCSCAN.length > 0) total += 199 - rightCSCAN[0]
-          }
-          seq = [...rightCSCAN, ...seq]
+          seq = [...left.reverse()]
+          if (seq.length && seq[seq.length - 1] !== 0) seq.push(0)
+          if (right.length) seq.push(199)
+          seq = [...seq, ...right.reverse()]
         }
         break
-      
-      case 'C-LOOK':
-        seq = []
-        let tempReqsCLOOK = [...reqs]
-        current = headPosition
-        let dirCLOOK = direction === 'right' ? 1 : -1
-        
-        tempReqsCLOOK.sort((a, b) => a - b)
-        let leftCLOOK = tempReqsCLOOK.filter(r => r <= current).sort((a, b) => a - b)
-        let rightCLOOK = tempReqsCLOOK.filter(r => r > current).sort((a, b) => a - b)
-        
-        if (dirCLOOK === 1) {
-          seq = [...rightCLOOK]
-          if (rightCLOOK.length > 0) total += Math.abs(rightCLOOK[rightCLOOK.length-1] - current)
-          
-          if (rightCLOOK.length > 0 && leftCLOOK.length > 0) {
-            total += rightCLOOK[rightCLOOK.length-1] - leftCLOOK[0]
-          }
-          seq = [...seq, ...leftCLOOK]
+      }
+      case 'C-LOOK': {
+        let tempReqs = [...reqs].sort((a, b) => a - b)
+        let dir = direction === 'right' ? 1 : -1
+        let left = tempReqs.filter(r => r < current).sort((a, b) => a - b)
+        let right = tempReqs.filter(r => r >= current).sort((a, b) => a - b)
+        if (dir === 1) {
+          seq = [...right]
+          if (left.length) seq.push(left[0])
+          seq = [...seq, ...left.slice(1)]
         } else {
-          seq = [...leftCLOOK]
-          if (leftCLOOK.length > 0) total += Math.abs(leftCLOOK[0] - current)
-          
-          if (leftCLOOK.length > 0 && rightCLOOK.length > 0) {
-            total += rightCLOOK[rightCLOOK.length-1] - leftCLOOK[0]
-          }
-          seq = [...rightCLOOK, ...seq]
+          seq = [...left.reverse()]
+          if (right.length) seq.push(right[right.length - 1])
+          seq = [...seq, ...right.slice(0, -1).reverse()]
         }
         break
+      }
     }
 
-    setSequence([headPosition, ...seq])
+    fullSequence = [headPosition, ...seq]
+    let total = 0
+    for (let i = 1; i < fullSequence.length; i++) {
+      total += Math.abs(fullSequence[i] - fullSequence[i - 1])
+    }
+    setSequence(fullSequence)
     setTotalSeek(total)
     setIsVisualizing(true)
     setCurrentStep(0)
